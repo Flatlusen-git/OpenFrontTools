@@ -24,3 +24,4 @@ Since this extension is in development, you can install it manually in any Chrom
 - `/name <YourName>` - Changes your display name and saves it locally.
 
 
+<img width="2540" height="1376" alt="ReadMeScreenshot" src="https://github.com/user-attachments/assets/d84af483-3ae1-4884-9d52-70975768fc76" />
