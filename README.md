@@ -1,0 +1,26 @@
+# OF Companion
+
+A lightweight, real-time chat overlay for players on [openfront.io](https://openfront.io). This extension allows you to communicate with other players in the same lobby or game room seamlessly.
+
+## Features
+- **Global & Room Chat:** Automatically switches channels based on your current game room.
+- **Persistent Username:** Set your name once with `/name YourName` and it stays saved.
+- **Draggable UI:** Click and hold the header to move the chat anywhere on your screen.
+
+## Installation (Manual Load)
+Since this extension is in development, you can install it manually in any Chromium-based browser (Chrome, Edge, Brave, Opera):
+
+1. **Download the code:** Click the green **Code** button at the top of this page and select **Download ZIP**.
+2. **Extract the files:** Unzip the downloaded file to a folder on your computer.
+3. **Open Extensions Page:** - In Chrome: Go to `chrome://extensions/`
+   - In Edge: Go to `edge://extensions/`
+4. **Enable Developer Mode:** Toggle the **Developer mode** switch (usually in the top right or bottom left corner).
+5. **Load the Extension:**
+   - Click **Load unpacked**.
+   - Select the folder where you extracted the files (the folder containing `manifest.json`).
+6. **Start Chatting:** Refresh [openfront.io](https://openfront.io) and the chat box should appear!
+
+## Chat Commands
+- `/name <YourName>` - Changes your display name and saves it locally.
+
+
