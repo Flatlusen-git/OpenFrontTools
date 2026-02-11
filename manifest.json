@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "OF Companion Extension",
+  "version": "1.0",
+  "permissions": ["storage"],
+  "host_permissions": ["https://*.supabase.co/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://openfront.io/*"], 
+      "js": ["supabase.js", "content.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}
