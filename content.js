@@ -141,4 +141,5 @@ document.addEventListener('mouseup', () => {
 // Start
 trackPresence(currentRoom);
 setInterval(checkURL, 2000);
-setInterval(syncMessages, 3000);
+setInterval(syncMessages, 1500);
+
