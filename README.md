@@ -2,6 +2,8 @@
 
 A lightweight, real-time chat overlay for players on [openfront.io](https://openfront.io). This extension allows you to communicate with other players in the same lobby or game room seamlessly.
 
+<img width="1586" height="812" alt="OpenFrontChatPicture1" src="https://github.com/user-attachments/assets/fc817022-8001-48fe-b9b3-8441e3339341" />
+
 ## Features
 - **Global & Room Chat:** Automatically switches channels based on your current game room.
 - **Persistent Username:** Set your name once with `/name YourName` and it stays saved.
@@ -23,7 +25,7 @@ Since this extension is in development, you can install it manually in any Chrom
 ## Chat Commands
 - `/name <YourName>` - Changes your display name and saves it locally.
 
-<img width="1586" height="812" alt="OpenFrontChatPicture1" src="https://github.com/user-attachments/assets/fc817022-8001-48fe-b9b3-8441e3339341" />
+
 
 
 
