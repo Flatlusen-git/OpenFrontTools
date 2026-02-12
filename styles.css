@@ -16,12 +16,14 @@
 }
 
 #of-chat-header {
-    padding: 10px;
-    background: #2a2a30;
+    background: #222;
+    padding: 8px;
+    cursor: grab; /* Visar att den går att flytta */
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
     border-bottom: 1px solid #444;
-    font-size: 12px;
-    cursor: grab;
-    user-select: none; /* Förhindrar att man markerar text när man drar */
 }
 
 #of-chat-messages {
@@ -29,6 +31,14 @@
     overflow-y: auto;
     padding: 10px;
     font-size: 13px;
+}
+
+#user-count {
+    font-size: 10px;
+    background: #444;
+    padding: 2px 6px;
+    border-radius: 8px;
+    color: #0f0; /* Grön färg för att det ska se "live" ut */
 }
 
 .msg { margin-bottom: 8px; }
@@ -44,4 +54,5 @@
     padding: 8px;
     border-radius: 5px;
     outline: none;
+
 }
