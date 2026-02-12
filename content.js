@@ -76,14 +76,27 @@ async function syncMessages() {
         .eq('room_id', currentRoom)
         .order('created_at', { ascending: false })
         .limit(20);
+
     if (data) {
-        msgContainer.innerHTML = data.reverse().map(m => `
+        // Kolla om användaren är nära botten innan vi uppdaterar
+        const isAtBottom = msgContainer.scrollHeight - msgContainer.scrollTop <= msgContainer.clientHeight + 50;
+        
+        const newHTML = data.reverse().map(m => `
             <div class="msg">
                 <span class="author">${m.author_name}:</span>
                 <span class="content">${m.content}</span>
             </div>
         `).join('');
-        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        // Uppdatera bara om innehållet faktiskt är nytt för att spara kraft
+        if (msgContainer.innerHTML !== newHTML) {
+            msgContainer.innerHTML = newHTML;
+            
+            // Scrolla bara ner om man inte manuellt scrollat upp för att läsa
+            if (isAtBottom) {
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }
+        }
     }
 }
 
@@ -142,4 +155,5 @@ document.addEventListener('mouseup', () => {
 trackPresence(currentRoom);
 setInterval(checkURL, 2000);
 setInterval(syncMessages, 1500);
+
 
