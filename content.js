@@ -1,159 +1,118 @@
-// --- KONFIGURATION ---
 const SUPABASE_URL = "https://dlgvoxsedctzoxiydxto.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ3ZveHNlZGN0em94aXlkeHRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MTM4NDUsImV4cCI6MjA4NjM4OTg0NX0.0cMrv6ESkY7CTySLLVlIE2X_zVX6p3ddIxrdo6U-naQ";
 
-if (typeof supabase === 'undefined' || !supabase.createClient) {
-    var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} else {
-    var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentRoom = "lobby";
-let userName = `Guest_${Math.floor(Math.random() * 9000) + 1000}`;
-let currentChannel = null;
+let userName = "Guest";
+let chatChannel = null;
 
-chrome.storage.local.get(['savedName'], (result) => {
-    if (result.savedName) userName = result.savedName;
+chrome.storage.local.get(['savedName'], (res) => {
+    if (res.savedName) userName = res.savedName;
 });
 
-// --- SKAPA UI ---
 const chatWrapper = document.createElement('div');
-// Vi använder ett ID som matchar ditt nya namn för tydlighet
-chatWrapper.id = 'openfront-chat-overlay'; 
+chatWrapper.id = "chat-container-main";
+chatWrapper.style = "position:fixed; bottom:20px; right:20px; width:300px; z-index:9999; color:white; font-family:sans-serif;";
 chatWrapper.innerHTML = `
-    <div id="of-chat-header">
-        <span>ROOM: <strong id="room-display">LOBBY</strong></span>
-        <span id="user-count" style="float: right; font-weight: normal; font-size: 10px; opacity: 0.7; margin-top: 2px;">Users: 1</span>
-    </div>
-    <div id="of-chat-messages"></div>
-    <div id="of-chat-input-area">
-        <input type="text" id="of-chat-input" placeholder="Skriv ett meddelande...">
+    <div style="background:rgba(0,0,0,0.9); border:1px solid #444; border-radius:5px; overflow:hidden; display:flex; flex-direction:column;">
+        <div id="chat-header" style="background:#222; padding:8px; border-bottom:1px solid #444; display:flex; justify-content:space-between; cursor:move; user-select:none;">
+            <span id="room-id">Lobby</span>
+            <span id="user-count">Users: 0</span>
+        </div>
+        <div id="msg-box" style="height:250px; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px;"></div>
+        <input type="text" id="chat-input" placeholder="Skriv meddelande..." style="width:100%; padding:10px; background:#111; border:none; color:white; border-top:1px solid #444;">
     </div>
 `;
 document.body.appendChild(chatWrapper);
 
-const msgContainer = document.getElementById('of-chat-messages');
-const roomDisplay = document.getElementById('room-display');
-const inputField = document.getElementById('of-chat-input');
-const userCountDisplay = document.getElementById('user-count');
+const msgBox = document.getElementById('msg-box');
+const input = document.getElementById('chat-input');
+const userCountLabel = document.getElementById('user-count');
+const chatHeader = document.getElementById('chat-header');
 
-// --- RÄKNARE (PRESENCE) ---
-async function trackPresence(room) {
-    if (currentChannel) currentChannel.unsubscribe();
-    currentChannel = supabaseClient.channel(`presence_${room}`, {
-        config: { presence: { key: userName } }
-    });
-    currentChannel
+function renderMessage(payload) {
+    const div = document.createElement('div');
+    div.innerHTML = `<span style="color:#aaa; font-size:10px;">[${new Date().toLocaleTimeString()}]</span> <b style="color:#00d4ff">${payload.author_name}:</b> ${payload.content}`;
+    msgBox.appendChild(div);
+    msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+async function setupChat(room) {
+    currentRoom = room;
+    document.getElementById('room-id').innerText = room.toUpperCase();
+    if (chatChannel) supabaseClient.removeChannel(chatChannel);
+
+    const { data } = await supabaseClient.from('messages').select('*').eq('room_id', room).order('created_at', { ascending: false }).limit(20);
+    msgBox.innerHTML = "";
+    if (data) data.reverse().forEach(renderMessage);
+
+    chatChannel = supabaseClient.channel(`room_${room}`);
+    chatChannel
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${room}` }, payload => {
+            renderMessage(payload.new);
+        })
         .on('presence', { event: 'sync' }, () => {
-            const state = currentChannel.presenceState();
-            userCountDisplay.innerText = `Users: ${Object.keys(state).length}`;
+            const count = Object.keys(chatChannel.presenceState()).length;
+            userCountLabel.innerText = `Users: ${count}`;
         })
         .subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') await currentChannel.track({ online_at: new Date().toISOString() });
+            if (status === 'SUBSCRIBED') {
+                await chatChannel.track({ user: userName, online_at: new Date().toISOString() });
+            }
         });
 }
 
-// --- LOGIK ---
-function checkURL() {
-    const url = window.location.href;
-    let newRoom = "lobby";
-    if (url.includes("/game/")) {
-        newRoom = url.split("/game/")[1].split("/")[0];
-    }
-    if (newRoom !== currentRoom) {
-        currentRoom = newRoom;
-        roomDisplay.innerText = currentRoom.toUpperCase();
-        msgContainer.innerHTML = ""; 
-        syncMessages();
-        trackPresence(currentRoom);
-    }
-}
-
-async function syncMessages() {
-    const { data } = await supabaseClient
-        .from('messages')
-        .select('*')
-        .eq('room_id', currentRoom)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-    if (data) {
-        // Kolla om användaren är nära botten innan vi uppdaterar
-        const isAtBottom = msgContainer.scrollHeight - msgContainer.scrollTop <= msgContainer.clientHeight + 50;
-        
-        const newHTML = data.reverse().map(m => `
-            <div class="msg">
-                <span class="author">${m.author_name}:</span>
-                <span class="content">${m.content}</span>
-            </div>
-        `).join('');
-
-        // Uppdatera bara om innehållet faktiskt är nytt för att spara kraft
-        if (msgContainer.innerHTML !== newHTML) {
-            msgContainer.innerHTML = newHTML;
-            
-            // Scrolla bara ner om man inte manuellt scrollat upp för att läsa
-            if (isAtBottom) {
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }
-        }
-    }
-}
-
-async function sendMessage(text) {
-    if (text.startsWith("/name ")) {
-        const newName = text.replace("/name ", "").trim();
-        if (newName) {
-            userName = newName;
+input.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter' && input.value.trim() !== "") {
+        const text = input.value;
+        if (text.startsWith("/name ")) {
+            userName = text.split(" ")[1];
             chrome.storage.local.set({savedName: userName});
-            addSystemMessage(`Namn ändrat till: ${userName}`);
-            trackPresence(currentRoom);
+            setupChat(currentRoom);
+        } else {
+            await supabaseClient.from('messages').insert([{ author_name: userName, content: text, room_id: currentRoom }]);
         }
-        return;
-    }
-    await supabaseClient.from('messages').insert([
-        { author_name: userName, content: text, room_id: currentRoom }
-    ]);
-}
-
-function addSystemMessage(text) {
-    msgContainer.innerHTML += `<div class="msg system" style="font-style: italic; opacity: 0.6; font-size: 0.9em;">${text}</div>`;
-    msgContainer.scrollTop = msgContainer.scrollHeight;
-}
-
-inputField.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && inputField.value.trim()) {
-        sendMessage(inputField.value);
-        inputField.value = "";
+        input.value = "";
     }
 });
 
-// --- FLYTTA RUTAN ---
+setInterval(() => {
+    const url = window.location.href;
+    let roomFromUrl = "lobby";
+    const match = url.match(/\/game\/([a-zA-Z0-9]+)/);
+    if (match) roomFromUrl = match[1];
+    if (roomFromUrl !== currentRoom) setupChat(roomFromUrl);
+}, 3000);
+
+setupChat("lobby");
+
+// DRAG AND DROP LOGIK
 let isDragging = false;
-let offsetX, offsetY;
-const header = document.getElementById('of-chat-header');
-header.addEventListener('mousedown', (e) => {
+let startX, startY;
+
+chatHeader.addEventListener('mousedown', (e) => {
     isDragging = true;
-    offsetX = e.clientX - chatWrapper.offsetLeft;
-    offsetY = e.clientY - chatWrapper.offsetTop;
-    header.style.cursor = 'grabbing';
+    // Beräkna var i headern vi klickade
+    startX = e.clientX - chatWrapper.offsetLeft;
+    startY = e.clientY - chatWrapper.offsetTop;
+    chatHeader.style.background = "#333"; // Visuell feedback
 });
+
 document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-        chatWrapper.style.left = (e.clientX - offsetX) + 'px';
-        chatWrapper.style.top = (e.clientY - offsetY) + 'px';
-        chatWrapper.style.bottom = 'auto';
-        chatWrapper.style.right = 'auto';
-    }
+    if (!isDragging) return;
+    
+    // Flytta containern
+    const newX = e.clientX - startX;
+    const newY = e.clientY - startY;
+
+    chatWrapper.style.left = newX + 'px';
+    chatWrapper.style.top = newY + 'px';
+    chatWrapper.style.bottom = 'auto'; // Viktigt: stäng av default-läget
+    chatWrapper.style.right = 'auto';
 });
+
 document.addEventListener('mouseup', () => {
     isDragging = false;
-    header.style.cursor = 'grab';
+    chatHeader.style.background = "#222";
 });
-
-// Start
-trackPresence(currentRoom);
-setInterval(checkURL, 2000);
-setInterval(syncMessages, 1500);
-
-
