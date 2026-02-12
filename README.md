@@ -23,8 +23,9 @@ Since this extension is in development, you can install it manually in any Chrom
 ## Chat Commands
 - `/name <YourName>` - Changes your display name and saves it locally.
 
+<img width="1586" height="812" alt="OpenFrontChatPicture1" src="https://github.com/user-attachments/assets/fc817022-8001-48fe-b9b3-8441e3339341" />
 
-<img width="2540" height="1376" alt="ReadMeScreenshot" src="https://github.com/user-attachments/assets/d84af483-3ae1-4884-9d52-70975768fc76" />
+
 
 
 ## FAQ
