@@ -1,4 +1,4 @@
-# OF Companion
+# OpenFront Chat Overlay
 
 A lightweight, real-time chat overlay for players on [openfront.io](https://openfront.io). This extension allows you to communicate with other players in the same lobby or game room seamlessly.
 
