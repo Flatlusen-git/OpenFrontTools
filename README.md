@@ -25,3 +25,15 @@ Since this extension is in development, you can install it manually in any Chrom
 
 
 <img width="2540" height="1376" alt="ReadMeScreenshot" src="https://github.com/user-attachments/assets/d84af483-3ae1-4884-9d52-70975768fc76" />
+
+
+## FAQ
+
+
+**Q: Why isn't it on the Chrome Web Store?** A: To keep this project free and community-driven, I’ve chosen to host it on GitHub. This avoids registration fees and allows for faster updates.
+
+**Q: How do I change my name?** A: Simply type `/name YourNewName` in the chat box and press Enter. Your name will be saved locally in your browser.
+
+**Q: Does the chat see my game data?** A: No. The extension only reads the URL of the page to determine which chat room you should be in. It doesn't access your game account or private info.
+
+**Q: I found a bug! What should I do?** A: Please open an "Issue" here on GitHub or reach out to me on Reddit. Feedback is much appreciated!
