@@ -1,4 +1,4 @@
-#of-companion-chat {
+#openfront-chat-overlay {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -14,16 +14,12 @@
     color: white;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
-
 #of-chat-header {
-    background: #222;
-    padding: 8px;
-    cursor: grab; /* Visar att den går att flytta */
-    user-select: none;
     display: flex;
     justify-content: space-between;
-    font-weight: bold;
-    border-bottom: 1px solid #444;
+    align-items: center;
+    padding: 0 10px;
+    cursor: grab;F
 }
 
 #of-chat-messages {
@@ -34,11 +30,11 @@
 }
 
 #user-count {
-    font-size: 10px;
-    background: #444;
-    padding: 2px 6px;
-    border-radius: 8px;
-    color: #0f0; /* Grön färg för att det ska se "live" ut */
+    font-size: 11px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: #00ff00; /* Neon-grön för att det ska synas */
 }
 
 .msg { margin-bottom: 8px; }
