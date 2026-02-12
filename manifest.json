@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "OF Companion Extension",
+  "name": "OpenFront Chat Overlay",
   "version": "1.0",
   "permissions": ["storage"],
   "host_permissions": ["https://*.supabase.co/*"],
@@ -11,4 +11,5 @@
       "css": ["styles.css"]
     }
   ]
+
 }
